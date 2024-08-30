@@ -9,7 +9,10 @@ class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
-      const user = await UserRepository.findByEmail(email);
+
+      const userEmail = email.toLowerCase();
+
+      const user = await UserRepository.findByEmail(userEmail);
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });

@@ -8,19 +8,20 @@ class UserController {
     try {
       const { email, name, password }: User = req.body;
 
+      const newEmail = email?.toLowerCase();
+
       if (!email || !name || !password) {
         return next(new CustomError(400, "Missing parameters"));
       }
 
-      const emailAlreadyUsed = await userRepository.findByEmail(email);
+      const emailAlreadyUsed = await userRepository.findByEmail(newEmail);
 
       if (emailAlreadyUsed) {
-        console.log("entrei");
         return next(new CustomError(400, "Email already used"));
       }
 
       const newUser: User = await userRepository.create({
-        email,
+        email: newEmail,
         name,
         password,
       });
