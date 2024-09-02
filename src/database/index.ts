@@ -9,6 +9,7 @@ dotenv.config();
 //   password: process.env.PGPASSWORD,
 //   database: process.env.PGDATABASE,
 // });
+
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -41,13 +42,21 @@ async function createTable() {
           description TEXT,
           is_done BOOLEAN NOT NULL DEFAULT FALSE,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          start_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           deleted_at TIMESTAMP,
           updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
       `),
     ]);
+
+    await client.query(`
+      ALTER TABLE tasks 
+      ADD COLUMN IF NOT EXISTS start_date TIMESTAMP;
+    `);
+
+    console.log("Coluna 'due_date' adicionada com sucesso (se não existia).");
   } catch (err) {
-    console.error("Erro ao criar as tabelas", err);
+    console.error("Erro ao criar as tabelas ou adicionar a coluna", err);
   }
 }
 
