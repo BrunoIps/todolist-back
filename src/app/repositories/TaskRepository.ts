@@ -4,12 +4,12 @@ import * as db from "../../database/index";
 class TaskRepository {
   async create(task: Task): Promise<Task> {
     try {
-      const { user_id, title, description, is_done } = task;
+      const { user_id, title, description, is_done, start_date } = task;
       const [newTask] = await db.query(
-        `INSERT INTO tasks (user_id, title, description, is_done)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO tasks (user_id, title, description, is_done, start_date)
+         VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
-        [user_id, title, description, is_done]
+        [user_id, title, description, is_done, start_date]
       );
       return newTask;
     } catch (error) {
@@ -18,12 +18,17 @@ class TaskRepository {
     }
   }
 
-  async findAllByUser(user_id: string): Promise<Task[]> {
+  async findAllByUser(user_id: string, start_date?: Date): Promise<Task[]> {
     try {
-      const tasks = await db.query(
-        `SELECT * FROM tasks WHERE user_id = $1 AND deleted_at IS NULL`,
-        [user_id]
-      );
+      let query = `SELECT * FROM tasks WHERE user_id = $1 AND deleted_at IS NULL`;
+      const params: any[] = [user_id];
+
+      if (start_date) {
+        query += ` AND DATE(start_date) = DATE($2)`;
+        params.push(start_date);
+      }
+
+      const tasks = await db.query(query, params);
       return tasks;
     } catch (error) {
       console.error(
@@ -52,16 +57,17 @@ class TaskRepository {
 
   async update(id: string, task: Partial<Task>): Promise<Task | null> {
     try {
-      const { title, description, is_done } = task;
+      const { title, description, is_done, start_date } = task;
       const [updatedTask] = await db.query(
         `UPDATE tasks SET 
          title = COALESCE($1, title),
          description = COALESCE($2, description),
          is_done = COALESCE($3, is_done),
+         start_date = COALESCE($4, start_date),
          updated_at = CURRENT_TIMESTAMP
-         WHERE id = $4 AND deleted_at IS NULL
+         WHERE id = $5 AND deleted_at IS NULL
          RETURNING *`,
-        [title, description, is_done, id]
+        [title, description, is_done, start_date, id]
       );
       return updatedTask || null;
     } catch (error) {

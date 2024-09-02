@@ -10,12 +10,14 @@ export interface Error {
   status: number;
 }
 
-export interface Task {
-  title: string;
-  description: string;
-  is_done: boolean;
+interface Task {
+  id?: string;
   user_id: string;
-  taskId?: string;
-  deletedAt?: Date;
-  createdAt?: Date;
+  title: string;
+  description?: string;
+  is_done: boolean;
+  start_date: Date;
+  created_at?: Date;
+  updated_at?: Date;
+  deleted_at?: Date;
 }

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { User } from "..";
 import userRepository from "../repositories/UserRepository";
 import { CustomError } from "../utils/customError";
+import TaskRepository from "../repositories/TaskRepository";
 
 class UserController {
   async store(req: Request, res: Response, next: NextFunction) {
@@ -93,6 +94,28 @@ class UserController {
       res.json(user);
     } catch (error) {
       next(error);
+    }
+  }
+
+  async getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { userId, date } = req.body;
+
+      const user = await userRepository.findById(userId);
+      if (!user) {
+        throw new CustomError(404, "User not found");
+      }
+
+      const { password, ...userWithoutPassword } = user;
+
+      const tasks = await TaskRepository.findAllByUser(
+        userId,
+        date ? new Date(date) : undefined
+      );
+
+      res.json({ user: { ...userWithoutPassword, tasks: tasks } });
+    } catch (err) {
+      next(err);
     }
   }
 }

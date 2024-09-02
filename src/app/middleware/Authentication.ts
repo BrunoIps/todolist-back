@@ -1,17 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { CustomError } from "../utils/customError";
 
 const JWT_SECRET = process.env.JWT_SECRET || "seu-segredo-jwt";
 
+interface CustomRequest extends Request {
+  user?: any;
+}
+
 export const authenticateJWT = (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(403).json({ message: "Token não fornecido" });
+    throw new CustomError(403, "Unauthorized");
   }
 
   try {
@@ -19,6 +24,6 @@ export const authenticateJWT = (
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Token inválido ou expirado" });
+    throw new CustomError(401, "Unauthorized");
   }
 };

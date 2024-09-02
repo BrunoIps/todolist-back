@@ -32,7 +32,7 @@ class AuthController {
         }
       );
 
-      res.json({ token });
+      res.json({ token, id: user.id });
     } catch (err) {
       next(err);
     }
