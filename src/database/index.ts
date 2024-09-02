@@ -2,12 +2,18 @@ import { Client, QueryResult } from "pg";
 import dotenv from "dotenv";
 dotenv.config();
 
+// const client = new Client({
+//   host: process.env.PGHOST,
+//   port: 5432,
+//   user: process.env.PGUSER,
+//   password: process.env.PGPASSWORD,
+//   database: process.env.PGDATABASE,
+// });
 const client = new Client({
-  host: process.env.PGHOST,
-  port: 5432,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 async function createTable() {
